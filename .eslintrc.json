@@ -1,0 +1,50 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:storybook/recommended"
+  ],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "newlines-between": "always",
+        "distinctGroup": false,
+        "pathGroupsExcludedImportTypes": ["external"],       
+        "groups": [
+          [
+            "builtin",
+            "external"
+          ],
+          "internal",
+          [
+            "sibling",
+            "parent"
+          ]
+        ],
+        "pathGroups": [
+          {
+            "pattern": "react",
+            "group": "builtin",
+            "position": "before"
+          },
+          {
+            "pattern": "next/**",
+            "group": "external"
+          },
+          {
+            "pattern": "@/**",
+            "group": "internal"
+          },
+          {
+            "pattern": "./**",
+            "group": "sibling"
+          },
+          {
+            "pattern": "./**",
+            "group": "parent"
+          }
+        ]
+      }
+    ]
+  }
+}

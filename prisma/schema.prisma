@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid()) @map("_id")
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id               String                         @id @default(cuid()) @map("_id")
+  nick             String?
+  name             String?
+  lastName         String?
+  password         String?
+  email            String?                        @unique
+  image            String?
+  emailVerified    DateTime?
+  acceptTerms      Boolean?
+  eneabled         Boolean?
+  accounts         Account[]
+  sessions         Session[]
+  solutions        JavascriptAssignmentSolution[]
+  userSprints      UserSprint[]
+  userTasks        UserTask[]
+  userCanbanColumn UserCanbanColumn[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model JavascriptAssignment {
+  id               String                         @id @default(cuid())
+  name             String
+  category         Category                       @default(FUNCTION)
+  difficultyLevel  DifficultyLevel                @default(EASY)
+  submissions      Int?                           @default(0)
+  descriptionStart String
+  descriptionEnd   String?
+  sampleInput      String[]
+  sampleOutput     String[]
+  tests            Json[]
+  patternFunction  String
+  solutions        JavascriptAssignmentSolution[]
+}
+
+model JavascriptAssignmentSolution {
+  id                     String               @id @default(cuid())
+  javascriptAssignment   JavascriptAssignment @relation(fields: [javascriptAssignmentId], references: [id])
+  javascriptAssignmentId String
+  solution               Json[]               @default([])
+  user                   User                 @relation(fields: [userId], references: [id])
+  userId                 String
+
+  @@unique([javascriptAssignmentId, userId])
+}
+
+model Module {
+  id               String          @id @default(cuid())
+  title            String
+  technology       Technology[]    @relation()
+  difficultyLevel  DifficultyLevel @default(EASY)
+  sprints          Sprint[]
+  duration         Int
+  shortDescription String
+  longDescription  String
+}
+
+model Sprint {
+  id           String         @id @default(cuid())
+  module       Module         @relation(fields: [moduleId], references: [id])
+  moduleId     String
+  title        String
+  shortDescription  String
+  longDescription   String
+  difficultyLevel   DifficultyLevel @default(EASY)
+  duration     Int
+  tasksAmount  Int
+  technology   Technology[]   @relation()
+  tasks        Task[]
+  userSprints  UserSprint[]
+  canbanColumn CanbanColumn[]
+}
+
+model CanbanColumn {
+  id               String             @id @default(cuid())
+  columnIndex      Int
+  name             String
+  task             Task[]
+  sprint           Sprint             @relation(fields: [sprintId], references: [id])
+  sprintId         String
+  userCanbanColumn UserCanbanColumn[]
+
+  @@unique([columnIndex, sprintId])
+}
+
+model Task {
+  id              String          @id @default(cuid())
+  title           String
+  taskNumber      Int
+  description     String
+  difficultyLevel DifficultyLevel @default(EASY)
+  status          TaskStatus      @default(TODO)
+  sprint          Sprint          @relation(fields: [sprintId], references: [id])
+  sprintId        String
+  userTasks       UserTask[]
+  CanbanColumn    CanbanColumn?   @relation(fields: [canbanColumnId], references: [id])
+  canbanColumnId  String
+  technology      TechnologyInTask @default(HTML)
+  taskCategory    TaskCategory @default(EXERCISE)
+  result          Result @default(INPROGRESS)
+}
+
+model UserSprint {
+  id              String @id @default(cuid())
+  user            User   @relation(fields: [userId], references: [id])
+  userId          String
+  sprint          Sprint @relation(fields: [sprintId], references: [id])
+  sprintId        String
+  completionLevel Int
+}
+
+model UserTask {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  task   Task   @relation(fields: [taskId], references: [id])
+  taskId String
+}
+
+model UserCanbanColumn {
+  id             String       @id @default(cuid())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String
+  canbanColumn   CanbanColumn @relation(fields: [canbanColumnId], references: [id])
+  canbanColumnId String
+}
+
+model Technology {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  module      Module[] @relation()
+  sprint      Sprint[] @relation()
+}
+
+enum Category {
+  FUNCTION
+  LOOP
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+  ADVANCED
+}
+
+enum TaskStatus {
+  TODO
+  INPROGRESS
+  TOBEFIXED
+  REVIEW
+  DONE
+}
+
+enum TechnologyInTask {
+  HTML
+  CSS
+  JS
+  TS
+  React
+  Nextjs
+}
+enum TaskCategory {
+  ARTICLE
+  QUIZ
+  EXERCISE
+  REPOTASK
+}
+enum Result {
+  POSITIVE
+  NEGATIVE
+  INPROGRESSREVIEW
+  INPROGRESS
+}
+
