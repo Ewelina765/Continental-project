@@ -37,30 +37,3 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
-DOCS
-
-- https://www.flowbite-react.com/
-- https://flowbite.com
-- https://docs.directus.io/
-- https://nextjs.org/
-- https://v2.tailwindcss.com/docs
-
-TODO
-
-- adds unused variables to eslint config
-- adds no console logs
-- conventional commits with jira ticket number once we create jira board
-- msw, playwright (cypress) setup
-- disable merge when checks fails
-- react query
-- flowbite (Rafał)
-- integracja jiry i githuba
-- planning poker jira
-
-TRY/CATH
-
-- we use !reponse.ok notation to handle custom errors
-
-DOCS
-
-- we use node 18.x
